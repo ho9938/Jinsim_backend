@@ -25,6 +25,11 @@ io.on('connection', (socket) => { // event when connection received
 
     socket.on('change_channel', async (packet, callback) => {
         callback(await controller.change_channel(packet));
+        io.emit('change_channel',)
+    });
+
+    socket.on('request_userinfo', async (packet, callback) => {
+        callback(await controller.request_userinfo(packet));
     });
 
     socket.on('request_roominfo', async (packet, callback) => {
