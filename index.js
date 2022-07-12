@@ -16,6 +16,11 @@ const { users_in_room } = require("./controller");
 app.use(bodyParser.json());
 app.use(cors());
 app.use("/oauth", require("./router/oauth"));
+app.use(
+    express.json({
+        limit: "50mb",
+    })
+);
 // app.use("/", route);
 
 //connectDB();
@@ -31,32 +36,38 @@ io.on("connection", (socket) => {
         if (data != null && data.rowCount == 1) {
             callback(true);
             if (packet.channel_from != null) {
-                io.to(packet.channel_from).emit("change_channel", request_users({
-                    channel_id: packet.channel_from
-                }));
+                socket.leave(packet.channel_from);
+                io.to(packet.channel_from).emit(
+                    "change_channel",
+                    await controller.request_users({
+                        channel_id: packet.channel_from,
+                    })
+                );
             }
-            io.to(packet.channel_to).emit("change_channel", request_users({
-                channel_id: packet.channel_to
-            }));
-        }
-        else {
+            socket.join(packet.channel_to);
+            io.to(packet.channel_to).emit(
+                "change_channel",
+                await controller.request_users({
+                    channel_id: packet.channel_to,
+                })
+            );
+        } else {
             callback(false);
             console.log("change_channel failed");
-            console.log(data)
+            console.log(data);
         }
     });
 
-    socket.on('request_userinfo', async (packet, callback) => {
+    socket.on("request_userinfo", async (packet, callback) => {
         // packet {user_id}
         const data = await controller.request_userinfo(packet);
 
         if (data.rowCount == 1) {
             callback(data.rows[0]);
-        }
-        else {
+        } else {
             callback(null);
             console.log("request_userinfo failed");
-            console.log(data)
+            console.log(data);
         }
     });
 
@@ -66,34 +77,38 @@ io.on("connection", (socket) => {
 
         callback({
             rowCount: data.rowCount,
-            rows: data.rows
+            rows: data.rows,
         });
     });
 
     socket.on("request_rooms", async (packet, callback) => {
         // packet {channel_id}
         const data = await controller.request_rooms(packet);
-
+        console.log("--request rooms--");
+        console.log(data.rows);
         callback({
             rowCount: data.rowCount,
-            rows: data.rows
+            rows: data.rows,
         });
     });
 
     socket.on("create_room", async (packet, callback) => {
         // packet {name, menu, max_capacity, create_time, complete, channel_id}
         const data = await controller.create_room(packet);
-
         if (data.rowCount == 1) {
-            callback(true);
-            io.to(packet.channel_id).emit("create_room", request_rooms({
-                channel_id: packet.channel_id
-            }));
-        }
-        else {
-            callback(false);
+            const room_id = data.rows[0].id;
+            socket.join(room_id);
+            callback({ result: true, room_id: room_id });
+            io.to(packet.channel_id).emit(
+                "create_room",
+                await controller.request_rooms({
+                    channel_id: packet.channel_id,
+                })
+            );
+        } else {
+            callback(null);
             console.log("change_channel failed");
-            console.log(data)
+            console.log(data);
         }
     });
 
@@ -104,14 +119,16 @@ io.on("connection", (socket) => {
 
         if (data != null && data.rowCount == 1) {
             callback(true);
-            io.to(packet.room_id).emit("enter_room", users_in_room({
-                room_id: packet.room_id
-            }));
-        }
-        else {
+            io.to(packet.room_id).emit(
+                "enter_room",
+                controller.users_in_room({
+                    room_id: packet.room_id,
+                })
+            );
+        } else {
             callback(false);
             console.log("enter_room failed");
-            console.log(data)
+            console.log(data);
         }
     });
 
@@ -132,21 +149,24 @@ io.on("connection", (socket) => {
 
         if (data != null && data.rowCount == 1) {
             callback(true);
-            io.to(room_id).emit("ready", users_in_room({
-                room_id: packet.room_id
-            }));
-        }
-        else {
+            io.to(room_id).emit(
+                "ready",
+                controller.users_in_room({
+                    room_id: packet.room_id,
+                })
+            );
+        } else {
             callback(false);
             console.log("ready failed");
-            console.log(data)
+            console.log(data);
         }
 
-        if (controller.users_in_room({ room_id: packet.room_id }).rowCount
-            == controller.readies_in_room({ room_id: packet.room_id }).rowCount) {
+        if (
+            controller.users_in_room({ room_id: packet.room_id }).rowCount ==
+            controller.readies_in_room({ room_id: packet.room_id }).rowCount
+        ) {
             controller.complete_room({ room_id: packet.room_id });
             io.to(packet.channel_id).emit("complete");
-
         }
     });
 
@@ -156,10 +176,9 @@ io.on("connection", (socket) => {
 
         if (data != null && data.rowCount == 1) {
             callback(true);
-        }
-        else {
+        } else {
             console.log("change_love failed");
-            console.log(data)
+            console.log(data);
             callback(false);
         }
     });
@@ -170,10 +189,9 @@ io.on("connection", (socket) => {
 
         if (data != null && data.rowCount == 1) {
             callback(true);
-        }
-        else {
+        } else {
             console.log("change_hate failed");
-            console.log(data)
+            console.log(data);
             callback(false);
         }
     });

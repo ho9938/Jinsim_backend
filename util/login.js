@@ -28,18 +28,20 @@ const login = async (req, res) => {
     try {
         const { data } = kakao_response;
         const { id, properties } = data;
-        const { nickname } = properties;
-
+        const { nickname, profile_image } = properties;
+        console.log(typeof profile_image);
         const user_info = await controller.login({
             user_id: id,
-            user_name: properties.nickname,
-            profile_image_url: properties.profile_image
-        })
+            user_name: nickname,
+            profile_image_url: profile_image,
+        });
+        console.log("프로퍼티 : ---- ");
+        console.log(properties);
 
         const response = {
             result: "success",
             data: data,
-            user_info: user_info.rows[0]
+            user_info: user_info.rows[0],
         };
         console.log(response);
         res.send(response);

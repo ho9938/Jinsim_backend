@@ -7,7 +7,7 @@ password int
 
 create table users
 (
-id int primary key,
+id bigint primary key,
 name varchar(30),
 profile_image_url varchar(2048),
 love varchar(50),
@@ -32,7 +32,7 @@ channel_id varchar(30)
 create table users_rooms
 (
 id serial primary key,
-user_id int,
+user_id bigint,
 room_id int,
 ready_state boolean
 );

@@ -1,24 +1,25 @@
 const pool = require("./db");
 
-class Controller {
-}
+class Controller {}
 
 controller = new Controller();
 
 controller.login = async (packet) => {
+    console.log("login 컨트롤러 호출");
     var data;
-
+    console.log(packet);
     data = await pool.query("select * from users where id = $1", [
         packet.user_id,
     ]);
-
-    if (data.rowCount == 1)
+    if (data.rowCount == 1) {
+        console.log(packet);
         return data;
-
+    }
+    console.log(packet);
     // else
     data = await pool.query(
         "insert into users (id, name, profile_image_url) values ($1,$2,$3) returning *",
-        [packet.user_id, packet.user_name, packet.profile_iamge_url]
+        [packet.user_id, packet.user_name, packet.profile_image_url]
     );
 
     return data;
@@ -103,9 +104,10 @@ controller.create_room = async (packet) => {
 };
 
 controller.enter_room = async (packet) => {
-
-    if (users_in_room({ room_id: packet.room_id }).rowCount
-        > request_roominfo({ room_id: packet.room_id }).rows[0].max_capacity) {
+    if (
+        users_in_room({ room_id: packet.room_id }).rowCount >
+        request_roominfo({ room_id: packet.room_id }).rows[0].max_capacity
+    ) {
         return null;
     }
 
@@ -128,7 +130,7 @@ controller.complete_room = async (packet) => {
     );
 
     return data;
-}
+};
 
 controller.users_in_room = async (packet) => {
     var data;
@@ -139,7 +141,7 @@ controller.users_in_room = async (packet) => {
     );
 
     return data;
-}
+};
 
 controller.readies_in_room = async (packet) => {
     var data;
@@ -150,7 +152,7 @@ controller.readies_in_room = async (packet) => {
     );
 
     return data;
-}
+};
 
 controller.ready = async (packet) => {
     var data;
