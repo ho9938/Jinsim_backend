@@ -1,7 +1,6 @@
 create table channels
 (
 id varchar(30) primary key,
-name varchar(30),
 max_capacity int,
 password int
 );
@@ -64,6 +63,11 @@ add constraint fk_room_id
 foreign key (room_id)
 references rooms (id)
 on delete set null;
+
+insert into channels values ('몰입캠프 1분반', 20, 1111);
+insert into channels values ('몰입캠프 2분반', 20, 2222);
+insert into channels values ('몰입캠프 3분반', 20, 3333);
+insert into channels values ('몰입캠프 4분반', 20, 4444);
 
 /*
 drop table users_rooms;

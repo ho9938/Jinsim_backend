@@ -1,4 +1,5 @@
 const axios = require("axios");
+const controller = require("../controller");
 
 const login = async (req, res) => {
     console.log(req.body);
@@ -28,9 +29,17 @@ const login = async (req, res) => {
         const { data } = kakao_response;
         const { id, properties } = data;
         const { nickname } = properties;
+
+        const user_info = await controller.login({
+            user_id: id,
+            user_name: properties.nickname,
+            profile_image_url: properties.profile_image
+        })
+
         const response = {
             result: "success",
             data: data,
+            user_info: user_info.rows[0]
         };
         console.log(response);
         res.send(response);

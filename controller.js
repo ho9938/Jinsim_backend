@@ -9,15 +9,16 @@ controller.login = async (packet) => {
     var data;
 
     data = await pool.query("select * from users where id = $1", [
-        packet.id,
+        packet.user_id,
     ]);
 
-    if (data.rowCount == 1) return;
+    if (data.rowCount == 1)
+        return data;
 
     // else
     data = await pool.query(
         "insert into users (id, name, profile_image_url) values ($1,$2,$3) returning *",
-        [packet.id, packet.name, packet.profile_iamge_url]
+        [packet.user_id, packet.user_name, packet.profile_iamge_url]
     );
 
     return data;
@@ -118,12 +119,34 @@ controller.enter_room = async (packet) => {
     return data;
 };
 
+controller.complete_room = async (packet) => {
+    var data;
+
+    data = await pool.query(
+        "update rooms set complete = $1 where room_id = $2 returning *",
+        [true, packet.room_id]
+    );
+
+    return data;
+}
+
 controller.users_in_room = async (packet) => {
     var data;
 
     data = await pool.query(
         "select * from users join users_rooms on users.id = users_rooms.user_id where users_rooms.room_id = $1",
         [packet.room_id]
+    );
+
+    return data;
+}
+
+controller.readies_in_room = async (packet) => {
+    var data;
+
+    data = await pool.query(
+        "select * from users join users_rooms on users.id = users_rooms.user_id where users_rooms.room_id = $1 and users_rooms.ready_status = $2",
+        [packet.room_id, true]
     );
 
     return data;
