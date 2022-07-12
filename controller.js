@@ -1,14 +1,6 @@
 const pool = require("./db");
 
 class Controller {
-    static select = async (packet) => {
-        const users = await pool.query(
-            "SELECT * FROM employees WHERE id = $1",
-            [id]
-        );
-        return;
-    };
-
     static login = async (packet) => {
         var data;
 
@@ -31,7 +23,7 @@ class Controller {
         var data;
 
         data = await pool.query("select * from channels where id = $1", [
-            packet.channel_id,
+            packet.channel_to,
         ]);
 
         if (data.rows[0].password != packet.password) {
@@ -41,12 +33,8 @@ class Controller {
         // else
         data = await pool.query(
             "update users set channel_id = $1 where id = $2 returning *",
-            [packet.channel_id, packet.id]
+            [packet.channel_to, packet.user_id]
         );
-
-        data = await pool.query("select * from rooms where channel_id = $1", [
-            packet.channel_id,
-        ]);
 
         return data;
     };
@@ -54,14 +42,34 @@ class Controller {
     static request_userinfo = async (packet) => {
         var data;
 
-        data = await pool.query("select * from rooms where channel_id = $1", [
-            packet.channel_id,
+        data = await pool.query("select * from users where id = $1", [
+            packet.user_id,
         ]);
 
         return data;
     };
 
     static request_roominfo = async (packet) => {
+        var data;
+
+        data = await pool.query("select * from rooms where id = $1", [
+            packet.room_id,
+        ]);
+
+        return data;
+    };
+
+    static request_users = async (packet) => {
+        var data;
+
+        data = await pool.query("select * from users where channel_id = $1", [
+            packet.channel_id,
+        ]);
+
+        return data;
+    };
+
+    static request_rooms = async (packet) => {
         var data;
 
         data = await pool.query("select * from rooms where channel_id = $1", [

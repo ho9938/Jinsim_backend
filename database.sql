@@ -1,6 +1,6 @@
 create table channels
 (
-id varchar(5) primary key,
+id varchar(10) primary key,
 name varchar(30),
 max_capacity int,
 password int
@@ -16,7 +16,7 @@ hate varchar(50),
 meal_period interval,
 last_ate timestamp,
 room_id int,
-channel_id varchar(5)
+channel_id varchar(10)
 );
 
 create table rooms
@@ -27,7 +27,7 @@ menu varchar(50),
 max_capacity int,
 created_time timestamp,
 complete boolean,
-channel_id varchar(5)
+channel_id varchar(10)
 );
 
 create table users_rooms
