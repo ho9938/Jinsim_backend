@@ -22,43 +22,44 @@ io.on("connection", (socket) => {
     console.log("socket connection complete");
 
     socket.on("login", async (packet, callback) => {
-        callback(controller.login(packet));
+        callback(await controller.login(packet));
     });
 
     socket.on("change_channel", async (packet, callback) => {
-        callback(controller.change_channel(packet));
+        callback(await controller.change_channel(packet));
     });
 
     socket.on("request_roominfo", async (packet, callback) => {
-        callback(controller.request_roominfo(packet));
+        callback(await controller.request_roominfo(packet));
     });
 
     socket.on("create_room", async (packet, callback) => {
-        callback(controller.change_channel(packet));
+        callback(await controller.create_room(packet));
+        io.emit("create_room", request_roominfo(packet));
     });
 
     socket.on("enter_room", async (packet, callback) => {
-        callback(controller.change_channel(packet));
+        callback(await controller.change_channel(packet));
     });
 
     socket.on("emotion", async (packet, callback) => {
-        callback(controller.change_channel(packet));
+        callback(await controller.change_channel(packet));
     });
 
     socket.on("request_kick", async (packet, callback) => {
-        callback(controller.change_channel(packet));
+        callback(await controller.change_channel(packet));
     });
 
     socket.on("ready", async (packet, callback) => {
-        callback(controller.change_channel(packet));
+        callback(await controller.change_channel(packet));
     });
 
     socket.on("change_like", async (packet, callback) => {
-        callback(controller.change_channel(packet));
+        callback(await controller.change_channel(packet));
     });
 
     socket.on("change_hate", async (packet, callback) => {
-        callback(controller.change_channel(packet));
+        callback(await controller.change_channel(packet));
     });
 
     socket.on("logout", async (packet, callback) => {

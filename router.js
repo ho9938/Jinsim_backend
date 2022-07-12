@@ -9,7 +9,7 @@ class Router {
             }
             else {
                 const result = await pool.query(
-                    "select $1 from $2 where $3", [data, table, condition]);
+                    "select $1 from $2 where $3 = $4", [data, table, condition.key, condition.value]);
             }
             return result;
         } catch (error) {
@@ -19,9 +19,15 @@ class Router {
 
     static insert = async (table, values) => {
         try {
-            const result = await pool.query(
-                "insert into $1 values $2", [table, values]);
-            return result;
+            if (table == "users") {
+                const result = await pool.query(
+                    "insert into $1 values ($2, $3, $4, $5, $6, $
+                    , [table, values.id, values.name, values.profile_image_url,
+                        values.channel_id, values.love, values.hate, values.meal_period,
+                        values.last_ate, values.current_room]);
+            }
+            else if (table == "")
+                return result;
         } catch (error) {
             console.log(error);
         }

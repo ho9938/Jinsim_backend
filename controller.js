@@ -24,7 +24,7 @@ class Controller {
             [packet.id, packet.name, packet.profile_iamge_url]
         );
 
-        return data.rowCount == 1;
+        return data;
     };
 
     static change_channel = async (packet) => {
@@ -51,28 +51,98 @@ class Controller {
         return data;
     };
 
-    // static request_roominfo = async (packet) => {
-    //     var data;
+    static request_userinfo = async (packet) => {
+        var data;
 
-    //     data =
+        data = await pool.query("select * from rooms where channel_id = $1", [
+            packet.channel_id,
+        ]);
 
-    // }
+        return data;
+    };
 
-    static create_room = async (packet) => {};
+    static request_roominfo = async (packet) => {
+        var data;
 
-    static enter_room = async (packet) => {};
+        data = await pool.query("select * from rooms where channel_id = $1", [
+            packet.channel_id,
+        ]);
 
-    static emotion = async (packet) => {};
+        return data;
+    };
 
-    static request_kick = async (packet) => {};
+    static create_room = async (packet) => {
+        var data;
 
-    static ready = async (packet) => {};
+        data = await pool.query(
+            "insert into rooms values (default,$1,$2,$3,$4,$5,$6) returning *",
+            [
+                packet.name,
+                packet.menu,
+                packet.max_capacity,
+                packet.created_time,
+                packet.complete,
+                packet.channel_id,
+            ]
+        );
 
-    static change_like = async (packet) => {};
+        return data;
+    };
 
-    static change_hate = async (packet) => {};
+    static enter_room = async (packet) => {
+        var data;
 
-    static logout = async (packet) => {};
+        data = await pool.query(
+            "insert into users_rooms values (default,$1,$2,$3) returning *",
+            [packet.user_id, packet.room_id, false]
+        );
+
+        return data;
+    };
+
+    static ready = async (packet) => {
+        var data;
+
+        data = await pool.query(
+            "update users_rooms set ready_state = $1 where user_id = $2 and room_id = $3 returning *",
+            [packet.ready_status, packet.user_id, packet.room_id]
+        );
+
+        return data;
+    };
+
+    static exit_room = async (packet) => {
+        var data;
+
+        data = await pool.query(
+            "delete from users_rooms where user_id = $1 and room_id = $2 returning *",
+            [packet.user_id, packet.room_id]
+        );
+
+        return data;
+    };
+
+    static change_love = async (packet) => {
+        var data;
+
+        data = await pool.query(
+            "update users set love = $1 where user_id = $2 returning *",
+            [packet.love, packet.id]
+        );
+
+        return data;
+    };
+
+    static change_hate = async (packet) => {
+        var data;
+
+        data = await pool.query(
+            "update users set hate = $1 where user_id = $2 returning *",
+            [packet.hate, packet.id]
+        );
+
+        return data;
+    };
 }
 
 const controller = new Controller();
