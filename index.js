@@ -10,6 +10,7 @@ const io = require("socket.io")(server);
 
 const controller = require("./controller");
 const { getPackedSettings } = require("http2");
+const { request } = require("http");
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -23,13 +24,15 @@ io.on("connection", (socket) => {
     console.log("socket connection complete");
 
     socket.on("change_channel", async (packet, callback) => {
-        // packet {user_id, channel_from, channel_to}
+        // packet {user_id, channel_from, channel_to, password}
         const data = await controller.change_channel(packet);
 
         if (data != null && data.rowCount == 1) {
-            io.to(packet.channel_from).emit("change_channel", request_users({
-                channel_id: packet.channel_from
-            }));
+            if (packet.channel_from != null) {
+                io.to(packet.channel_from).emit("change_channel", request_users({
+                    channel_id: packet.channel_from
+                }));
+            }
             io.to(packet.channel_to).emit("change_channel", request_users({
                 channel_id: packet.channel_to
             }));
@@ -94,26 +97,27 @@ io.on("connection", (socket) => {
     });
 
     socket.on("enter_room", async (packet, callback) => {
-        // packet {user_id, room_id}
-        const data = await controller.create_room(packet);
+        // packet {room_id}
+
+        const data = await controller.enter_room(packet);
+
         if (data != null && data.rowCount == 1) {
-            io.to(packet.channel_from).emit("change_channel", request_users({
-                channel_id: packet.channel_from
-            }));
-            io.to(packet.channel_to).emit("change_channel", request_users({
-                channel_id: packet.channel_to
+            io.to(packet.room_id).emit("enter_room", users_in_room({
+                room_id: packet.room_id
             }));
             callback(true);
         }
         else {
-            console.log("change_channel failed");
+            console.log("enter_room failed");
             console.log(data)
             callback(false);
         }
     });
 
     socket.on("emotion", async (packet, callback) => {
-        callback(await controller.change_channel(packet));
+        // packet {user_id, room_id, emotion}
+
+        io.to(room_id).emit("emotion", packet);
     });
 
     socket.on("request_kick", async (packet, callback) => {
@@ -124,8 +128,18 @@ io.on("connection", (socket) => {
         callback(await controller.change_channel(packet));
     });
 
-    socket.on("change_like", async (packet, callback) => {
-        callback(await controller.change_channel(packet));
+    socket.on("change_love", async (packet, callback) => {
+        // packet {user_id, channel_id, love}
+        const data = await controller.change_channel(packet);
+
+        if (data != null && data.rowCount == 1) {
+            callback(true);
+        }
+        else {
+            console.log("change_love failed");
+            console.log(data)
+            callback(false);
+        }
     });
 
     socket.on("change_hate", async (packet, callback) => {
