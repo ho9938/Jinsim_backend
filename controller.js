@@ -2,16 +2,19 @@ const pool = require("./db");
 
 class Controller {
     static select = async (packet) => {
-        const users = await pool.query("SELECT * FROM employees WHERE id = $1", [id]);
-        return
-    }
+        const users = await pool.query(
+            "SELECT * FROM employees WHERE id = $1",
+            [id]
+        );
+        return;
+    };
 
     static login = async (packet) => {
         var data;
 
-        data = await pool.query(
-            "select * from users where id = $1",
-            [packet.id]);
+        data = await pool.query("select * from users where id = $1", [
+            packet.id,
+        ]);
 
         if (data.rowCount == 1) return;
 
@@ -22,18 +25,17 @@ class Controller {
         );
 
         return data.rowCount == 1;
-    }
+    };
 
     static change_channel = async (packet) => {
         var data;
 
-        data = await pool.query(
-            "select * from channels where id = $1",
-            [packet.channel_id]
-        );
+        data = await pool.query("select * from channels where id = $1", [
+            packet.channel_id,
+        ]);
 
         if (data.rows[0].password != packet.password) {
-            return null
+            return null;
         }
 
         // else
@@ -42,53 +44,35 @@ class Controller {
             [packet.channel_id, packet.id]
         );
 
-        data = await pool.query(
-            "select * from rooms where channel_id = $1",
-            [packet.channel_id]
-        )
+        data = await pool.query("select * from rooms where channel_id = $1", [
+            packet.channel_id,
+        ]);
 
         return data;
-    }
+    };
 
-    static request_roominfo = async (packet) => {
-        var data;
+    // static request_roominfo = async (packet) => {
+    //     var data;
 
-        data = 
+    //     data =
 
-    }
+    // }
 
-    static create_room = async (packet) => {
+    static create_room = async (packet) => {};
 
-    }
+    static enter_room = async (packet) => {};
 
-    static enter_room = async (packet) => {
+    static emotion = async (packet) => {};
 
-    }
+    static request_kick = async (packet) => {};
 
-    static emotion = async (packet) => {
+    static ready = async (packet) => {};
 
-    }
+    static change_like = async (packet) => {};
 
-    static request_kick = async (packet) => {
+    static change_hate = async (packet) => {};
 
-    }
-
-    static ready = async (packet) => {
-
-    }
-
-    static change_like = async (packet) => {
-
-    }
-
-    static change_hate = async (packet) => {
-
-    }
-
-    static logout = async (packet) => {
-
-    }
-
+    static logout = async (packet) => {};
 }
 
 const controller = new Controller();
